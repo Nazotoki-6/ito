@@ -60,3 +60,28 @@ v6.1 タブレット対応
 ・ドラッグできない場合は「↑」「↓」ボタンで並べ替え可能
 ・古めのSafariで問題になりやすい replaceAll / optional chaining を避けるよう変更
 ・タブレットでは文字・ボタン・数字を大きめに表示
+
+
+v7 オフライン対応 / PWA
+
+追加ファイル
+・manifest.json
+・service-worker.js
+・icons/icon-192.png
+・icons/icon-512.png
+・icons/apple-touch-icon.png
+
+使い方
+1. GitHub の Nazotoki-6/ito リポジトリへ、このZIP内のファイルをすべてアップロードしてください。
+2. GitHub Pages のURLをオンライン状態で一度開いてください。
+3. 画面に「オフライン準備OK ✓」と出ればキャッシュ完了です。
+4. その後は機内モードでも起動できます。
+5. iPad / iPhone は Safari の共有ボタン →「ホーム画面に追加」にするとアプリ風に起動できます。
+
+注意
+・最初の1回だけはインターネット接続が必要です。
+・GitHubのURLではなく、GitHub Pagesの公開URLから開いてください。
+・Service Worker は https のGitHub Pages上で動きます。index.htmlをfile://で直接開いた場合はPWAのオフライン保存は働きません。
+・今後ファイルを更新した際は service-worker.js の CACHE_NAME
+  （現在: ito-game-cache-v7-20260822）
+  を v8 など新しい名前へ変更すると、古いキャッシュを確実に更新できます。

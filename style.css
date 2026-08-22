@@ -243,3 +243,16 @@ button{
   button{min-height:58px}
   .move-btn{width:58px;min-width:58px;height:58px;font-size:28px}
 }
+
+
+/* v7 offline / PWA */
+.offline-status{
+  margin-top:4px;
+  text-align:center;
+  font-size:12px;
+  font-weight:800;
+  color:#777;
+}
+.offline-status.ready{
+  color:#2f6f3e;
+}
