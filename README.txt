@@ -52,3 +52,11 @@ script.js
 topics.csv
 topics-data.js
 README.txt
+
+
+v6.1 タブレット対応
+・iPad / Androidタブレット向けに順位操作を改善
+・ドラッグに Pointer Events と Touch Events の両方を使用
+・ドラッグできない場合は「↑」「↓」ボタンで並べ替え可能
+・古めのSafariで問題になりやすい replaceAll / optional chaining を避けるよう変更
+・タブレットでは文字・ボタン・数字を大きめに表示

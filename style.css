@@ -208,3 +208,38 @@ button{
   .scale-text{font-size:12px}
   .ranking-heading{font-size:23px}
 }
+
+
+/* v6.1 tablet support */
+.rank-card{
+  grid-template-columns:44px 1fr auto;
+  touch-action:none;
+}
+.rank-controls{
+  display:flex;
+  gap:6px;
+}
+.move-btn{
+  width:48px;
+  min-width:48px;
+  height:48px;
+  padding:0;
+  border-radius:12px;
+  background:#e9e9ec;
+  color:#111;
+  font-size:24px;
+  line-height:1;
+  font-weight:950;
+}
+.move-btn:disabled{opacity:.25}
+
+@media(min-width:700px){
+  .app{max-width:900px}
+  .card,.stage{padding:26px}
+  .topic-main{font-size:42px;min-height:260px}
+  .current-player{font-size:48px}
+  .covered-number,.secret-number{width:230px;height:230px}
+  .secret-number{font-size:108px}
+  button{min-height:58px}
+  .move-btn{width:58px;min-width:58px;height:58px;font-size:28px}
+}

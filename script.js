@@ -79,11 +79,11 @@ const clearHistoryBtn = $("clearHistoryBtn");
 
 function escapeHtml(value) {
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function activePlayers() {
@@ -100,7 +100,9 @@ function shuffle(array) {
 }
 
 function uniqueNumbers(count) {
-  return shuffle(Array.from({ length: 100 }, (_, i) => i + 1)).slice(0, count);
+  var numbers = [];
+  for (var i = 1; i <= 100; i++) numbers.push(i);
+  return shuffle(numbers).slice(0, count);
 }
 
 function renderPlayers() {
@@ -416,75 +418,169 @@ function openRanking() {
 }
 
 function renderSortable() {
-  sortableList.innerHTML = rankingOrder.map((name, index) => `
-    <div class="rank-card" data-name="${escapeHtml(name)}">
-      <span class="rank-index">${index + 1}位</span>
-      <span class="rank-name">${escapeHtml(name)}</span>
-      <span class="drag-handle">≡</span>
-    </div>
-  `).join("");
+  sortableList.innerHTML = rankingOrder.map(function(name, index) {
+    return `
+      <div class="rank-card" data-name="${escapeHtml(name)}">
+        <span class="rank-index">${index + 1}位</span>
+        <span class="rank-name">${escapeHtml(name)}</span>
+        <div class="rank-controls">
+          <button class="move-btn move-up" type="button" aria-label="上へ">↑</button>
+          <button class="move-btn move-down" type="button" aria-label="下へ">↓</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  var cards = sortableList.querySelectorAll(".rank-card");
+  for (var i = 0; i < cards.length; i++) {
+    (function(index) {
+      var card = cards[index];
+      var up = card.querySelector(".move-up");
+      var down = card.querySelector(".move-down");
+
+      up.disabled = index === 0;
+      down.disabled = index === cards.length - 1;
+
+      up.addEventListener("click", function(event) {
+        event.stopPropagation();
+        moveRank(index, -1);
+      });
+
+      down.addEventListener("click", function(event) {
+        event.stopPropagation();
+        moveRank(index, 1);
+      });
+    })(i);
+  }
 
   attachSortableEvents();
 }
 
-function syncRankingFromDom() {
-  rankingOrder = [...sortableList.querySelectorAll(".rank-card")].map(card => card.dataset.name);
+function moveRank(index, direction) {
+  var target = index + direction;
+  if (target < 0 || target >= rankingOrder.length) return;
 
-  [...sortableList.querySelectorAll(".rank-card")].forEach((card, index) => {
-    const rank = card.querySelector(".rank-index");
-    rank.textContent = `${index + 1}位`;
-  });
+  var temp = rankingOrder[index];
+  rankingOrder[index] = rankingOrder[target];
+  rankingOrder[target] = temp;
+
+  playTone("tap");
+  vibrate(15);
+  renderSortable();
+}
+
+function syncRankingFromDom() {
+  var cards = sortableList.querySelectorAll(".rank-card");
+  rankingOrder = [];
+
+  for (var i = 0; i < cards.length; i++) {
+    rankingOrder.push(cards[i].getAttribute("data-name"));
+    cards[i].querySelector(".rank-index").textContent = (i + 1) + "位";
+  }
 }
 
 function attachSortableEvents() {
-  sortableList.querySelectorAll(".rank-card").forEach(card => {
-    let activePointer = null;
+  var cards = sortableList.querySelectorAll(".rank-card");
 
-    const moveCard = clientY => {
-      const cards = [...sortableList.querySelectorAll(".rank-card")].filter(el => el !== card);
-      let inserted = false;
+  for (var i = 0; i < cards.length; i++) {
+    (function(card) {
+      var dragging = false;
+      var activePointer = null;
+      var touchId = null;
 
-      for (const other of cards) {
-        const rect = other.getBoundingClientRect();
-        const midpoint = rect.top + rect.height / 2;
-
-        if (clientY < midpoint) {
-          sortableList.insertBefore(card, other);
-          inserted = true;
-          break;
-        }
+      function isMoveButton(target) {
+        return target && target.classList && target.classList.contains("move-btn");
       }
 
-      if (!inserted) sortableList.appendChild(card);
-      syncRankingFromDom();
-    };
+      function moveCard(clientY) {
+        var allCards = sortableList.querySelectorAll(".rank-card");
+        var inserted = false;
 
-    card.addEventListener("pointerdown", event => {
-      activePointer = event.pointerId;
-      card.setPointerCapture?.(event.pointerId);
-      card.classList.add("dragging");
-      event.preventDefault();
-      playTone("tap");
-      vibrate(15);
-    });
+        for (var j = 0; j < allCards.length; j++) {
+          var other = allCards[j];
+          if (other === card) continue;
 
-    card.addEventListener("pointermove", event => {
-      if (activePointer !== event.pointerId) return;
-      moveCard(event.clientY);
-      event.preventDefault();
-    });
+          var rect = other.getBoundingClientRect();
+          if (clientY < rect.top + rect.height / 2) {
+            sortableList.insertBefore(card, other);
+            inserted = true;
+            break;
+          }
+        }
 
-    const endDrag = event => {
-      if (activePointer !== event.pointerId) return;
-      activePointer = null;
-      card.classList.remove("dragging");
-      syncRankingFromDom();
-      event.preventDefault();
-    };
+        if (!inserted) sortableList.appendChild(card);
+        syncRankingFromDom();
+      }
 
-    card.addEventListener("pointerup", endDrag);
-    card.addEventListener("pointercancel", endDrag);
-  });
+      if (window.PointerEvent) {
+        card.addEventListener("pointerdown", function(event) {
+          if (isMoveButton(event.target)) return;
+          activePointer = event.pointerId;
+          dragging = true;
+
+          if (card.setPointerCapture) {
+            try { card.setPointerCapture(event.pointerId); } catch (e) {}
+          }
+
+          card.classList.add("dragging");
+          event.preventDefault();
+        });
+
+        card.addEventListener("pointermove", function(event) {
+          if (!dragging || activePointer !== event.pointerId) return;
+          moveCard(event.clientY);
+          event.preventDefault();
+        });
+
+        function endPointer(event) {
+          if (!dragging || activePointer !== event.pointerId) return;
+          dragging = false;
+          activePointer = null;
+          card.classList.remove("dragging");
+          syncRankingFromDom();
+          renderSortable();
+          event.preventDefault();
+        }
+
+        card.addEventListener("pointerup", endPointer);
+        card.addEventListener("pointercancel", endPointer);
+      }
+
+      card.addEventListener("touchstart", function(event) {
+        if (isMoveButton(event.target)) return;
+        if (!event.changedTouches || !event.changedTouches.length) return;
+
+        touchId = event.changedTouches[0].identifier;
+        dragging = true;
+        card.classList.add("dragging");
+      }, { passive: true });
+
+      card.addEventListener("touchmove", function(event) {
+        if (!dragging || touchId === null) return;
+
+        for (var k = 0; k < event.changedTouches.length; k++) {
+          var touch = event.changedTouches[k];
+          if (touch.identifier === touchId) {
+            moveCard(touch.clientY);
+            event.preventDefault();
+            break;
+          }
+        }
+      }, { passive: false });
+
+      function endTouch() {
+        if (!dragging) return;
+        dragging = false;
+        touchId = null;
+        card.classList.remove("dragging");
+        syncRankingFromDom();
+        renderSortable();
+      }
+
+      card.addEventListener("touchend", endTouch, { passive: true });
+      card.addEventListener("touchcancel", endTouch, { passive: true });
+    })(cards[i]);
+  }
 }
 
 function startAnswerReveal() {
