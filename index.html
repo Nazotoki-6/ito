@@ -13,6 +13,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="updateBanner" class="update-banner hidden" role="status" aria-live="polite">
+    <div class="update-banner-text">
+      <strong>新しいバージョンがあります</strong>
+      <span>更新すると最新版に切り替わります。</span>
+    </div>
+    <button id="updateAppBtn" class="update-app-button" type="button">更新する</button>
+  </div>
+
   <main class="app">
 
     <section id="setupScreen" class="screen">
@@ -21,7 +29,7 @@
         <button id="historyBtn" class="icon-button" type="button">履歴</button>
       </header>
 
-      <section class="card">
+      <section class="card participants-card">
         <div class="section-head">
           <h2>参加メンバー</h2>
           <span id="remaining" class="pill">お題 読み込み中...</span>
@@ -31,7 +39,71 @@
         <p class="note">レ点が付いている人だけ参加します。数字を見る順番は毎ラウンドランダムです。</p>
       </section>
 
-      <section class="card">
+      <section id="resumeCard" class="card resume-card hidden">
+        <div class="resume-title">前回のゲームがあります</div>
+        <div id="resumeSummary" class="resume-summary"></div>
+        <button id="resumeGameBtn" class="primary" type="button">前回のゲームを再開</button>
+        <button id="discardGameBtn" class="text-button danger-text" type="button">前回のゲームを破棄</button>
+      </section>
+
+      <section class="card game-mode-card">
+        <div class="section-head"><h2>ゲームルール</h2></div>
+        <div class="topic-mode-options">
+          <label class="topic-mode-option">
+            <input type="radio" name="gameMode" value="normal" checked>
+            <span><strong>通常ルール</strong><small>いつものito</small></span>
+          </label>
+          <label class="topic-mode-option">
+            <input type="radio" name="gameMode" value="werewolf">
+            <span><strong>🐺 人狼ルール</strong><small>4〜6人・人狼は全ROUND同じ1人</small></span>
+          </label>
+        </div>
+        <div id="werewolfOptions" class="werewolf-options hidden">
+          <div class="werewolf-rule-note">
+            <strong>人狼の難易度</strong>
+            <div class="topic-mode-options">
+              <label class="topic-mode-option">
+                <input type="radio" name="wolfDifficulty" value="normal" checked>
+                <span><strong>通常</strong><small>数字は51〜100</small></span>
+              </label>
+              <label class="topic-mode-option">
+                <input type="radio" name="wolfDifficulty" value="hard">
+                <span><strong>🔥 難しい</strong><small>数字は80〜100のみ</small></span>
+              </label>
+            </div>
+            <div id="wolfRangeDescription">数字は<strong>51〜100</strong>のみ。ただしお題の尺度は常に<strong>1〜100</strong>のままです。</div>
+          </div>
+          <p class="note"><strong>5ROUND固定</strong>です。PERFECTを3回逃すと人狼の勝利条件を達成します。途中では終了せず、5ROUND終了後に人狼を1人予想します。正体を当てられたら人狼は負けです。</p>
+          <p class="note"><strong>会話ルール：</strong>回答の変更・質問・順位の相談・他人の回答を上下に評価する発言はOKです。ただし「俺はかなり上」「真ん中より上」「80以上」など、<strong>自分の数字の位置を直接伝える・匂わせる発言は禁止</strong>です。</p>
+        </div>
+      </section>
+
+      <section class="card topic-mode-card">
+        <div class="section-head">
+          <h2>お題モード</h2>
+          <span id="favoriteCount" class="pill">★ 0問</span>
+        </div>
+
+        <div class="topic-mode-options">
+          <label class="topic-mode-option">
+            <input type="radio" name="topicMode" value="normal" checked>
+            <span>
+              <strong>通常</strong>
+              <small>まだ使っていないお題から遊ぶ</small>
+            </span>
+          </label>
+
+          <label class="topic-mode-option">
+            <input type="radio" name="topicMode" value="favorites">
+            <span>
+              <strong>★ お気に入りだけ</strong>
+              <small>「盛り上がった」を付けたお題だけで遊ぶ</small>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card settings-card">
         <h2>演出設定</h2>
         <div class="setting-row">
           <span>効果音</span>
@@ -57,7 +129,11 @@
 
     <section id="gameScreen" class="screen hidden">
       <header class="game-header">
-        <span id="roundLabel" class="round-label">ROUND 1</span>
+        <div>
+          <span id="roundLabel" class="round-label">ROUND 1</span>
+          <div id="wakeLockStatus" class="wake-lock-status">画面スリープ防止を準備中</div>
+          <div id="wolfStatus" class="wolf-status hidden"></div>
+        </div>
         <button id="endGameBtn" class="end-button" type="button">ゲーム終了</button>
       </header>
 
@@ -76,8 +152,10 @@
         </div>
 
         <div id="numberView" class="hidden">
+          <div id="secretRole" class="secret-role hidden"></div>
           <p class="small-label">あなたの数字</p>
           <div id="secretNumber" class="secret-number">--</div>
+          <p id="wolfSecretHint" class="wolf-secret-hint hidden">正体がバレないように、自然に並び順を乱してください。</p>
           <p class="privacy strong">数字を覚えてください。次の人の名前は、数字を隠すまで表示されません。</p>
           <button id="hideNumberBtn" class="primary giant-button" type="button">数字を隠す</button>
         </div>
@@ -94,6 +172,7 @@
           <strong>1</strong>
         </div>
 
+        <div id="rangeRuleNotice" class="werewolf-range-notice hidden">🐺 このROUNDの数字は <strong>51〜100</strong>。ただし回答は通常どおり「1〜100の尺度」で考えます。</div>
         <p class="small-label">今回のお題</p>
         <div id="topic" class="topic-main"></div>
 
@@ -117,7 +196,7 @@
         <button id="goRankingBtn" class="primary giant-button" type="button">順番を決める</button>
       </section>
 
-      <!-- STEP 3: ドラッグ順位 -->
+      <!-- STEP 3: 順位を1位から選択 -->
       <section id="rankingStage" class="stage hidden">
         <div class="step-badge">STEP 3</div>
         <h2 class="ranking-heading">数字が<strong>大きい順</strong>に並べる</h2>
@@ -128,16 +207,26 @@
           <strong>最下位＝1に近い</strong>
         </div>
 
-        <p class="drag-help">名前カードを上下にドラッグできます。動かしにくい場合は右の「↑↓」でも並べ替えできます。</p>
-        <div id="sortableList" class="sortable-list"></div>
+        <p class="rank-select-help">1位だと思う人から順番に、名前をタップしてください。</p>
 
-        <button id="answerStartBtn" class="primary giant-button" type="button">この順番で答え発表</button>
+        <div id="rankSlots" class="rank-slots"></div>
+
+        <div class="member-select-title">未選択のメンバー</div>
+        <div id="rankButtons" class="rank-buttons"></div>
+
+        <div class="rank-actions">
+          <button id="undoRankBtn" class="secondary rank-action" type="button" disabled>1つ戻す</button>
+          <button id="clearRankBtn" class="secondary rank-action" type="button" disabled>最初から</button>
+        </div>
+
+        <button id="answerStartBtn" class="primary giant-button" type="button" disabled>この順番で答え発表</button>
       </section>
 
       <!-- STEP 4: 答え発表 -->
       <section id="answerStage" class="stage hidden">
         <div class="step-badge">STEP 4</div>
         <h2>答え発表！</h2>
+        <p id="answerGuide" class="answer-guide">名前 → 数字の順に発表します</p>
 
         <div id="answerRevealList" class="answer-reveal-list"></div>
 
@@ -147,14 +236,35 @@
           <div id="resultBadge" class="result-badge"></div>
           <div id="resultDetail" class="result-detail"></div>
 
+          <div class="session-stats-card">
+            <div class="session-stats-title">今回のゲーム成績</div>
+            <div id="sessionStats" class="session-stats"></div>
+          </div>
+
           <div class="guess-summary">
             <span>みんなの予想</span>
             <strong id="guessSummary"></strong>
           </div>
 
+          <div class="compare-title">予想と正解を比較</div>
+          <div id="compareBoard" class="compare-board"></div>
+
+          <button id="favoriteTopicBtn" class="favorite-topic-button" type="button">☆ 盛り上がった</button>
+
           <button id="nextRoundBtn" class="primary giant-button" type="button">次のラウンド</button>
           <button id="sameTopicBtn" class="secondary" type="button">同じお題でもう一度</button>
         </div>
+      </section>
+
+      <!-- 人狼ルール：最終推理 -->
+      <section id="wolfStage" class="stage hidden">
+        <div class="step-badge">FINAL</div>
+        <h2>🐺 人狼は誰だ？</h2>
+        <p class="wolf-final-help">ゲーム終了です。みんなで相談して、人狼だと思う人を1人だけ選んでください。</p>
+        <div id="wolfGuessButtons" class="rank-buttons"></div>
+        <button id="revealWolfBtn" class="primary giant-button" type="button" disabled>この人で決定・正体公開</button>
+        <div id="wolfFinalResult" class="hidden"></div>
+        <button id="finishWolfGameBtn" class="primary giant-button hidden" type="button">ゲームを終了</button>
       </section>
     </section>
   </main>
@@ -171,16 +281,68 @@
     </div>
   </div>
 
+  <div id="confirmModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-card confirm-card">
+      <h2 id="confirmTitle">確認</h2>
+      <p id="confirmMessage" class="confirm-message"></p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="secondary" type="button">キャンセル</button>
+        <button id="confirmOkBtn" class="danger-button" type="button">実行する</button>
+      </div>
+    </div>
+  </div>
+
   <script src="topics-data.js"></script>
+  <script src="wolf-topics-data.js"></script>
   <script src="script.js"></script>
   <script>
     (function() {
       var statusEl = document.getElementById("offlineStatus");
+      var updateBanner = document.getElementById("updateBanner");
+      var updateButton = document.getElementById("updateAppBtn");
+      var waitingWorker = null;
+      var refreshing = false;
 
       function setStatus(text, ready) {
         if (!statusEl) return;
         statusEl.textContent = text;
-        if (ready) statusEl.classList.add("ready");
+        statusEl.classList.toggle("ready", !!ready);
+      }
+
+      function showUpdate(worker) {
+        if (!worker || !updateBanner) return;
+        waitingWorker = worker;
+        updateBanner.classList.remove("hidden");
+      }
+
+      function watchRegistration(registration) {
+        if (registration.waiting && navigator.serviceWorker.controller) {
+          showUpdate(registration.waiting);
+        }
+
+        registration.addEventListener("updatefound", function() {
+          var installing = registration.installing;
+          if (!installing) return;
+
+          installing.addEventListener("statechange", function() {
+            if (
+              installing.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              showUpdate(registration.waiting || installing);
+            }
+          });
+        });
+
+        if (navigator.onLine) {
+          registration.update().catch(function() {});
+        }
+
+        window.setInterval(function() {
+          if (navigator.onLine) {
+            registration.update().catch(function() {});
+          }
+        }, 30 * 60 * 1000);
       }
 
       if (!("serviceWorker" in navigator)) {
@@ -188,9 +350,26 @@
         return;
       }
 
+      if (updateButton) {
+        updateButton.addEventListener("click", function() {
+          if (!waitingWorker) return;
+
+          updateButton.disabled = true;
+          updateButton.textContent = "更新中…";
+          waitingWorker.postMessage({ type: "SKIP_WAITING" });
+        });
+      }
+
+      navigator.serviceWorker.addEventListener("controllerchange", function() {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
       window.addEventListener("load", function() {
         navigator.serviceWorker.register("./service-worker.js")
           .then(function(registration) {
+            watchRegistration(registration);
             return navigator.serviceWorker.ready;
           })
           .then(function() {
@@ -206,8 +385,9 @@
       });
 
       window.addEventListener("online", function() {
-        navigator.serviceWorker.ready.then(function() {
+        navigator.serviceWorker.ready.then(function(registration) {
           setStatus("オフライン準備OK ✓", true);
+          registration.update().catch(function() {});
         });
       });
     })();

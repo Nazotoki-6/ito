@@ -1,4 +1,4 @@
-const CACHE_NAME = "ito-game-cache-v7-20260822";
+const CACHE_NAME = "ito-game-cache-v8-8-20260911";
 
 const CORE_ASSETS = [
   "./",
@@ -7,6 +7,8 @@ const CORE_ASSETS = [
   "./script.js",
   "./topics.csv",
   "./topics-data.js",
+  "./wolf-topics.csv",
+  "./wolf-topics-data.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -19,10 +21,13 @@ self.addEventListener("install", function(event) {
       .then(function(cache) {
         return cache.addAll(CORE_ASSETS);
       })
-      .then(function() {
-        return self.skipWaiting();
-      })
   );
+});
+
+self.addEventListener("message", function(event) {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", function(event) {

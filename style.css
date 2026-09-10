@@ -256,3 +256,653 @@ button{
 .offline-status.ready{
   color:#2f6f3e;
 }
+
+
+/* v7.1 順位選択：ランダム初期配置を廃止 */
+.rank-select-help{
+  text-align:center;
+  color:#6e6e73;
+  font-size:14px;
+  line-height:1.55;
+  margin:0 0 14px;
+}
+.rank-slots{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  margin-bottom:18px;
+}
+.rank-slot{
+  display:grid;
+  grid-template-columns:62px 1fr;
+  gap:10px;
+  align-items:center;
+  min-height:62px;
+  padding:11px 14px;
+  border:2px dashed #d7d7dc;
+  border-radius:15px;
+  background:#fafafa;
+}
+.rank-slot.filled{
+  border-style:solid;
+  border-color:#111;
+  background:#fff;
+}
+.rank-slot-position{
+  color:#777;
+  font-size:14px;
+  font-weight:900;
+}
+.rank-slot-name{
+  font-size:20px;
+  font-weight:950;
+}
+.rank-slot-name.empty{
+  color:#aaa;
+  font-weight:750;
+}
+.member-select-title{
+  margin:0 0 8px;
+  color:#777;
+  font-size:13px;
+  font-weight:850;
+}
+.rank-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+  margin-bottom:10px;
+}
+.rank-select-button{
+  min-height:56px;
+  background:#111;
+  color:#fff;
+  font-size:18px;
+  font-weight:900;
+}
+.rank-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin:0 0 14px;
+}
+.rank-action{
+  min-height:50px;
+  font-size:15px;
+}
+.all-selected{
+  grid-column:1 / -1;
+  padding:14px;
+  border-radius:14px;
+  background:#f1f1f4;
+  text-align:center;
+  font-weight:900;
+}
+
+
+/* v7.2 途中再開 */
+.resume-card{
+  border:2px solid #111;
+}
+.resume-title{
+  font-size:20px;
+  font-weight:950;
+  text-align:center;
+  margin-bottom:8px;
+}
+.resume-summary{
+  text-align:center;
+  color:#555;
+  font-size:14px;
+  line-height:1.6;
+  margin-bottom:14px;
+}
+
+
+/* v7.3 お題進捗の永続保存 */
+.pill.all-used{
+  background:#111;
+  color:#fff;
+}
+
+
+/* v7.4 ゲーム中の画面スリープ防止 */
+.wake-lock-status{
+  margin-top:3px;
+  color:#777;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.3;
+}
+.wake-lock-status.active{
+  color:#2f6f3e;
+}
+.wake-lock-status.unsupported{
+  color:#8a6d3b;
+}
+
+
+/* v7.5 誤タップ防止 */
+.confirm-card{
+  max-width:440px;
+}
+.confirm-message{
+  margin:10px 0 18px;
+  color:#555;
+  font-size:15px;
+  line-height:1.65;
+  white-space:pre-line;
+}
+.confirm-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.danger-button{
+  min-height:52px;
+  border:0;
+  border-radius:14px;
+  background:#b42318;
+  color:#fff;
+  font-size:16px;
+  font-weight:900;
+}
+.danger-button:active{
+  transform:scale(.98);
+}
+
+
+/* v7.6 答え発表演出 */
+.answer-guide{
+  margin:-4px 0 14px;
+  text-align:center;
+  color:#777;
+  font-size:13px;
+  font-weight:800;
+}
+
+.answer-row.name-only .answer-number{
+  color:#aaa;
+}
+
+.answer-row.first-place{
+  min-height:92px;
+  border:3px solid #111;
+  background:#fff;
+  padding:16px 18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.10);
+}
+
+.answer-row.first-place .answer-rank{
+  font-size:16px;
+  color:#111;
+}
+
+.answer-row.first-place .answer-name{
+  font-size:28px;
+}
+
+.answer-row.first-place .answer-number{
+  font-size:46px;
+  min-width:76px;
+}
+
+.answer-row.first-place.name-only{
+  animation:winnerPulse .52s ease;
+}
+
+.answer-row.first-place.winner-revealed{
+  animation:winnerReveal .62s ease;
+}
+
+@keyframes winnerPulse{
+  0%{transform:scale(.92);opacity:.2}
+  65%{transform:scale(1.035)}
+  100%{transform:scale(1);opacity:1}
+}
+
+@keyframes winnerReveal{
+  0%{transform:scale(.92);opacity:.15}
+  50%{transform:scale(1.055)}
+  100%{transform:scale(1);opacity:1}
+}
+
+
+/* v7.7 予想と正解の比較 */
+.compare-title{
+  margin:20px 0 10px;
+  text-align:center;
+  font-size:16px;
+  font-weight:950;
+}
+
+.compare-board{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:18px;
+}
+
+.compare-column{
+  background:#f7f7f9;
+  border-radius:14px;
+  padding:12px;
+}
+
+.compare-column-title{
+  margin-bottom:8px;
+  text-align:center;
+  color:#666;
+  font-size:13px;
+  font-weight:950;
+}
+
+.compare-row{
+  display:grid;
+  grid-template-columns:36px 1fr auto;
+  align-items:center;
+  gap:6px;
+  min-height:44px;
+  padding:7px 8px;
+  margin-bottom:6px;
+  border-radius:10px;
+  background:#fff;
+}
+
+.compare-row:last-child{
+  margin-bottom:0;
+}
+
+.compare-row.match{
+  outline:2px solid #2f6f3e;
+  background:#f3fbf5;
+}
+
+.compare-row.miss{
+  opacity:.8;
+}
+
+.compare-rank{
+  color:#777;
+  font-size:12px;
+  font-weight:900;
+}
+
+.compare-name{
+  font-size:15px;
+  font-weight:950;
+}
+
+.compare-number{
+  min-width:36px;
+  text-align:right;
+  font-size:15px;
+  font-weight:950;
+}
+
+.compare-check{
+  color:#2f6f3e;
+}
+
+@media(max-width:520px){
+  .compare-board{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* v7.8 ROUND終了時の累計成績 */
+.session-stats-card{
+  margin:18px 0;
+  padding:14px;
+  border-radius:16px;
+  background:#f5f5f7;
+}
+
+.session-stats-title{
+  margin-bottom:10px;
+  text-align:center;
+  color:#666;
+  font-size:13px;
+  font-weight:950;
+}
+
+.session-stats{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+
+.session-stat{
+  min-height:62px;
+  padding:9px 8px;
+  border-radius:12px;
+  background:#fff;
+  text-align:center;
+}
+
+.session-stat strong{
+  display:block;
+  font-size:22px;
+  line-height:1.15;
+}
+
+.session-stat span{
+  display:block;
+  margin-top:4px;
+  color:#777;
+  font-size:11px;
+  font-weight:850;
+}
+
+.session-stat.main{
+  grid-column:1 / -1;
+}
+
+.session-stat.main strong{
+  font-size:28px;
+}
+
+
+/* v7.9 お題のお気に入り */
+.topic-mode-options{
+  display:grid;
+  gap:10px;
+}
+
+.topic-mode-option{
+  display:block;
+  cursor:pointer;
+}
+
+.topic-mode-option input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+
+.topic-mode-option > span{
+  display:block;
+  padding:14px 15px;
+  border:2px solid #dedee3;
+  border-radius:14px;
+  background:#fff;
+}
+
+.topic-mode-option strong{
+  display:block;
+  font-size:17px;
+  font-weight:950;
+}
+
+.topic-mode-option small{
+  display:block;
+  margin-top:4px;
+  color:#777;
+  font-size:12px;
+  line-height:1.4;
+}
+
+.topic-mode-option input:checked + span{
+  border-color:#111;
+  background:#f4f4f6;
+  box-shadow:0 0 0 1px #111 inset;
+}
+
+.favorite-topic-button{
+  width:100%;
+  min-height:54px;
+  margin:4px 0 14px;
+  border:2px solid #d9b100;
+  border-radius:14px;
+  background:#fffdf0;
+  color:#6f5a00;
+  font-size:16px;
+  font-weight:950;
+}
+
+.favorite-topic-button.active{
+  border-color:#d09a00;
+  background:#fff3b0;
+  color:#4e3b00;
+}
+
+
+/* v8.0 アップデート通知 */
+.update-banner{
+  position:fixed;
+  left:50%;
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  z-index:150;
+  width:min(680px,calc(100% - 24px));
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:13px 14px;
+  border:1px solid #d8d8dd;
+  border-radius:18px;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 14px 40px rgba(0,0,0,.20);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.update-banner-text{min-width:0;flex:1}
+.update-banner-text strong{display:block;font-size:15px;font-weight:950}
+.update-banner-text span{
+  display:block;margin-top:2px;color:#666;font-size:11px;line-height:1.35
+}
+.update-app-button{
+  width:auto;min-width:104px;flex:0 0 auto;padding:12px 14px;
+  border-radius:13px;background:#111;color:#fff;font-size:14px;font-weight:950
+}
+.update-app-button:disabled{opacity:.6}
+
+/* v8.0 iPad / タブレット横向き専用 */
+@media (orientation: landscape) and (min-width:700px) {
+  body{overflow-x:hidden}
+  .app{max-width:1180px;padding:10px 18px 24px}
+  .screen{min-height:calc(100svh - 20px)}
+  .game-header{padding:6px 0 8px}
+  .card,.stage{border-radius:18px}
+
+  /* セットアップ */
+  #setupScreen{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);
+    gap:12px;
+    align-content:start;
+  }
+  #setupScreen > .app-header{grid-column:1 / -1;margin:2px 0 4px}
+  #setupScreen > .card{margin:0}
+  #setupScreen > .participants-card{grid-column:1;grid-row:2 / span 2}
+  #setupScreen > .resume-card{grid-column:1 / -1}
+  #setupScreen > .topic-mode-card{grid-column:2}
+  #setupScreen > .settings-card{grid-column:2}
+  #setupScreen > #startBtn,
+  #setupScreen > #resetTopicsBtn,
+  #setupScreen > #offlineStatus,
+  #setupScreen > #setupMessage{grid-column:1 / -1}
+  #setupScreen > #startBtn{margin-top:2px}
+  .players{grid-template-columns:repeat(3,1fr)}
+
+  /* ゲーム画面共通 */
+  .stage{
+    min-height:calc(100svh - 72px);
+    margin-bottom:0;
+    padding:16px 22px;
+  }
+  .step-badge{margin-bottom:5px}
+
+  /* STEP 1 */
+  #numberStage{justify-content:start}
+  #numberStage > h2{margin-bottom:5px}
+  #numberStage > .progress{margin-bottom:8px}
+  #passView,#numberView{
+    width:100%;max-width:920px;margin:auto;align-items:center;gap:8px 28px
+  }
+  #passView{
+    display:grid;
+    grid-template-columns:minmax(280px,1fr) minmax(300px,1fr);
+    grid-template-areas:
+      "label card"
+      "player card"
+      "privacy button";
+  }
+  #passView > .small-label{grid-area:label;margin:0}
+  #passView > .current-player{grid-area:player;margin:0}
+  #passView > .privacy{grid-area:privacy;margin:0}
+  #passView > .covered-number{grid-area:card}
+  #passView > #revealBtn{grid-area:button}
+
+  #numberView{
+    display:grid;
+    grid-template-columns:minmax(300px,1fr) minmax(320px,1fr);
+    grid-template-areas:
+      "label number"
+      "privacy number"
+      "button number";
+  }
+  #numberView > .small-label{grid-area:label;margin:0}
+  #numberView > .privacy{grid-area:privacy;margin:0}
+  #numberView > .secret-number{grid-area:number}
+  #numberView > #hideNumberBtn{grid-area:button}
+  .covered-number,.secret-number{
+    width:min(31svh,250px);height:min(31svh,250px);margin:0 auto
+  }
+  .secret-number{font-size:min(14svh,112px)}
+
+  /* STEP 2 */
+  #topicStage{
+    display:grid;
+    grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);
+    grid-template-rows:auto auto auto 1fr auto;
+    grid-template-areas:
+      "badge badge"
+      "direction discussion"
+      "label discussion"
+      "topic discussion"
+      "scale button";
+    column-gap:20px;row-gap:8px;align-items:stretch;
+  }
+  #topicStage > .step-badge{grid-area:badge}
+  #topicStage > .direction-banner{grid-area:direction;margin:0}
+  #topicStage > .small-label{grid-area:label;margin:0;align-self:end}
+  #topicStage > .topic-main{grid-area:topic}
+  #topicStage > .scale-guide{grid-area:scale;margin:0}
+  #topicStage > .discussion-card{
+    grid-area:discussion;align-self:center;margin:0;padding:20px
+  }
+  #topicStage > #goRankingBtn{grid-area:button;align-self:end}
+  .topic-main{
+    min-height:0;margin:0;padding:14px 18px;font-size:clamp(34px,5vw,58px)
+  }
+  .scale-box{min-height:76px}
+
+  /* STEP 3 */
+  #rankingStage{
+    display:grid;
+    grid-template-columns:minmax(360px,1fr) minmax(320px,.9fr);
+    grid-template-rows:auto auto auto auto auto 1fr auto auto;
+    grid-template-areas:
+      "badge badge"
+      "heading heading"
+      "slots direction"
+      "slots help"
+      "slots member"
+      "slots buttons"
+      "slots actions"
+      "slots answer";
+    gap:8px 20px;justify-content:stretch;align-items:start;
+  }
+  #rankingStage > .step-badge{grid-area:badge}
+  #rankingStage > .ranking-heading{grid-area:heading;margin:0 0 2px}
+  #rankingStage > .direction-banner.compact{
+    grid-area:direction;margin:0;flex-direction:row;justify-content:space-between;padding:9px 12px
+  }
+  #rankingStage > .direction-banner.compact span{
+    transform:rotate(-90deg);font-size:18px
+  }
+  #rankingStage > .rank-select-help{grid-area:help;margin:0}
+  #rankingStage > .rank-slots{grid-area:slots;margin:0;align-self:stretch}
+  #rankingStage > .member-select-title{grid-area:member;margin:0}
+  #rankingStage > .rank-buttons{grid-area:buttons;margin:0}
+  #rankingStage > .rank-actions{grid-area:actions;margin:0}
+  #rankingStage > #answerStartBtn{grid-area:answer}
+  .rank-slot{min-height:52px;padding:8px 12px}
+  .rank-buttons{grid-template-columns:repeat(2,1fr)}
+  .rank-select-button{min-height:48px}
+
+  /* STEP 4 */
+  #answerStage{
+    display:grid;
+    grid-template-columns:minmax(350px,.9fr) minmax(380px,1.1fr);
+    grid-template-rows:auto auto auto auto 1fr;
+    grid-template-areas:
+      "badge badge"
+      "title title"
+      "list guide"
+      "list reveal"
+      "list result";
+    gap:8px 20px;align-items:start;
+  }
+  #answerStage > .step-badge{grid-area:badge}
+  #answerStage > h2{grid-area:title;margin:0}
+  #answerStage > .answer-guide{grid-area:guide;margin:0;align-self:end}
+  #answerStage > .answer-reveal-list{grid-area:list;margin:0}
+  #answerStage > #revealNextAnswerBtn{grid-area:reveal}
+  #answerStage > #finalResult{grid-area:result;margin-top:0}
+  .answer-placeholder,.answer-row{min-height:54px;padding:8px 12px}
+  .answer-row.first-place{min-height:72px}
+  .answer-row.first-place .answer-name{font-size:24px}
+  .answer-row.first-place .answer-number{font-size:38px}
+  .session-stats-card{margin:10px 0}
+  .session-stats{grid-template-columns:repeat(5,1fr)}
+  .session-stat.main{grid-column:auto}
+  .session-stat{min-height:58px}
+  .session-stat strong,.session-stat.main strong{font-size:20px}
+  .compare-board{grid-template-columns:1fr 1fr}
+  .guess-summary{margin-bottom:10px}
+  .compare-title{margin-top:12px}
+  .favorite-topic-button{margin-bottom:10px}
+
+  .modal{align-items:center}
+  .modal-panel{max-height:92svh}
+  .update-banner{width:min(760px,calc(100% - 40px))}
+}
+
+/* 高さが低めの横向き端末 */
+@media (orientation: landscape) and (min-width:700px) and (max-height:650px) {
+  .stage{min-height:calc(100svh - 64px);padding-top:10px;padding-bottom:10px}
+  .covered-number,.secret-number{
+    width:min(28svh,190px);height:min(28svh,190px)
+  }
+  .topic-main{font-size:clamp(30px,4.5vw,48px)}
+  .rank-slot{min-height:46px}
+  .answer-placeholder,.answer-row{min-height:48px}
+}
+
+/* v8.3 人狼ルール */
+.werewolf-options{margin-top:14px;padding:14px;border-radius:16px;background:#fff4f4;border:1px solid #ffd0d0}
+.werewolf-rule-note{line-height:1.7}.round-choice-title{font-weight:800;margin:12px 0 8px}.round-choice{display:flex;gap:12px;flex-wrap:wrap}.round-choice label{padding:10px 14px;border-radius:12px;background:#fff;border:1px solid #ddd;font-weight:700}
+.wolf-status{margin-top:4px;font-size:.82rem;font-weight:800;color:#9d1c1c}.secret-role{margin:8px auto 14px;padding:12px 18px;border-radius:16px;font-size:1.25rem;font-weight:900;max-width:360px}.secret-role.citizen{background:#eef6ff;color:#155da8}.secret-role.wolf{background:#2a1111;color:#fff;border:2px solid #d84545}.wolf-secret-hint{max-width:420px;margin:0 auto 18px;padding:12px;border-radius:12px;background:#fff0f0;color:#8d1717;font-weight:700;line-height:1.6}
+.wolf-final-help{text-align:center;line-height:1.7}.wolf-guess-button.selected{outline:4px solid #d84545;background:#fff0f0}.wolf-result-title{font-size:2rem;font-weight:1000;text-align:center;margin:22px 0 10px}.wolf-result-reveal{text-align:center;font-size:1.25rem;margin:12px 0}.wolf-result-reveal strong{font-size:1.6rem}.wolf-result-score{text-align:center;font-weight:900;padding:12px;border-radius:14px;background:#f3f3f5;margin-top:14px}#wolfFinalResult p{text-align:center;line-height:1.7}
+.werewolf-range-notice{margin:0 auto 14px;max-width:560px;padding:12px 14px;border-radius:14px;background:#fff2e8;border:1px solid #ffc999;text-align:center;line-height:1.6;font-weight:700}
+
+/* v8.8 お題の日本語改行を自然にする */
+.topic-main{
+  word-break:normal;
+  overflow-wrap:normal;
+  line-break:strict;
+  text-wrap:balance;
+  padding-left:24px;
+  padding-right:24px;
+}
+@media (orientation: landscape) and (min-width:700px){
+  .topic-main{
+    font-size:clamp(30px,4.1vw,50px);
+    line-height:1.4;
+    padding-left:30px;
+    padding-right:30px;
+  }
+}
