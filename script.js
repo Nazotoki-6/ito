@@ -14,6 +14,8 @@ let remainingTopics = [];
 let wolfTopics = [];
 let wolfTopicQueue = [];
 let lastWolfTopicId = null;
+let lastTopicCategory = null;
+let lastWolfTopicCategory = null;
 let currentTopic = null;
 let topicMode = "normal";
 let favoriteTopicIds = [];
@@ -38,6 +40,7 @@ let roundNumber = 0;
 let gameActive = false;
 let numberVisible = false;
 let gameMode = "normal";
+let normalRange = "full";
 let werewolfTotalRounds = 5;
 let wolfDifficulty = "normal";
 let werewolfName = null;
@@ -50,7 +53,7 @@ let audioContext = null;
 
 const HISTORY_KEY = "itoHistoryV6";
 const SETTINGS_KEY = "itoSettingsV6";
-const GAME_STATE_KEY = "itoGameStateV85";
+const GAME_STATE_KEY = "itoGameStateV93";
 const TOPIC_PROGRESS_KEY = "itoTopicProgressV73";
 const FAVORITES_KEY = "itoFavoriteTopicsV79";
 
@@ -65,6 +68,7 @@ const setupScreen = $("setupScreen");
 const gameScreen = $("gameScreen");
 const playersEl = $("players");
 const remainingEl = $("remaining");
+const wolfRemainingEl = $("wolfRemaining");
 const soundToggle = $("soundToggle");
 const vibrationToggle = $("vibrationToggle");
 const startBtn = $("startBtn");
@@ -73,6 +77,8 @@ const setupMessage = $("setupMessage");
 const favoriteCount = $("favoriteCount");
 const topicModeInputs = document.querySelectorAll('input[name="topicMode"]');
 const gameModeInputs = document.querySelectorAll('input[name="gameMode"]');
+const normalRangeInputs = document.querySelectorAll('input[name="normalRange"]');
+const normalRangeOptions = $("normalRangeOptions");
 const wolfRoundInputs = document.querySelectorAll('input[name="wolfRounds"]');
 const wolfDifficultyInputs = document.querySelectorAll('input[name="wolfDifficulty"]');
 const wolfRangeDescription = $("wolfRangeDescription");
@@ -167,7 +173,7 @@ function shuffle(array) {
 
 function uniqueNumbers(count) {
   var numbers = [];
-  var start = gameMode === "werewolf" ? (wolfDifficulty === "hard" ? 80 : 51) : 1;
+  var start = gameMode === "werewolf" ? (wolfDifficulty === "hard" ? 80 : 51) : (normalRange === "upper20" ? 80 : normalRange === "upper50" ? 51 : 1);
   for (var i = start; i <= 100; i++) numbers.push(i);
   return shuffle(numbers).slice(0, count);
 }
@@ -183,7 +189,9 @@ function updateWolfStatus() {
     return;
   }
   wolfStatus.classList.remove("hidden");
-  wolfStatus.textContent = `🐺 並び替えミス ${werewolfMisses} / ${wolfMissTarget()}　・　全${werewolfTotalRounds}ROUND`;
+  var rangeText = wolfDifficulty === "hard" ? "80〜100" : "51〜100";
+  var difficultyText = wolfDifficulty === "hard" ? "🔥 難しい" : "通常";
+  wolfStatus.innerHTML = `<span class="wolf-difficulty">${difficultyText} ${rangeText}</span><span>ROUND ${roundNumber} / ${werewolfTotalRounds}</span><span>失敗 ${werewolfMisses} / ${wolfMissTarget()}</span>`;
 }
 
 function renderPlayers() {
@@ -381,15 +389,21 @@ function pickWolfTopic() {
     wolfTopicQueue = shuffle(validIds);
   }
 
-  if (wolfTopicQueue.length > 1 && lastWolfTopicId !== null && wolfTopicQueue[0] === lastWolfTopicId) {
-    var swap = wolfTopicQueue[0];
-    wolfTopicQueue[0] = wolfTopicQueue[1];
-    wolfTopicQueue[1] = swap;
+  // 同じカテゴリが連続しすぎないよう、別カテゴリを優先する。
+  var pickIndex = 0;
+  if (lastWolfTopicCategory && wolfTopicQueue.length > 1) {
+    var altIndex = wolfTopicQueue.findIndex(function(id) {
+      var t = topicById(id);
+      return t && t.category !== lastWolfTopicCategory;
+    });
+    if (altIndex >= 0) pickIndex = altIndex;
   }
 
-  var id = wolfTopicQueue.shift();
+  var id = wolfTopicQueue.splice(pickIndex, 1)[0];
   lastWolfTopicId = id;
-  return topicById(id);
+  var picked = topicById(id);
+  if (picked) lastWolfTopicCategory = picked.category || null;
+  return picked;
 }
 
 function hasTopicForCurrentMode() {
@@ -458,29 +472,25 @@ async function loadTopics() {
   saveFavorites();
 
   restoreTopicProgress();
+  updateRemaining();
   updateFavoriteUI();
   showResumeCardIfNeeded();
 }
 
 function updateRemaining() {
-  if (gameMode === "werewolf") {
-    remainingEl.textContent = `🐺 人狼専用お題 ${wolfTopics.length}問`;
-    remainingEl.classList.toggle("all-used", wolfTopics.length === 0);
-    return;
+  if (remainingEl) {
+    if (topicMode === "favorites" && gameMode !== "werewolf") {
+      remainingEl.textContent = `★ お気に入り ${favoriteTopicIds.length}問`;
+      remainingEl.classList.toggle("all-used", favoriteTopicIds.length === 0);
+    } else {
+      remainingEl.textContent = `通常 残り ${remainingTopics.length} / ${allTopics.length}`;
+      remainingEl.classList.toggle("all-used", allTopics.length > 0 && remainingTopics.length === 0);
+    }
   }
 
-  if (topicMode === "favorites") {
-    remainingEl.textContent = `★ お気に入り ${favoriteTopicIds.length}問`;
-    remainingEl.classList.toggle("all-used", favoriteTopicIds.length === 0);
-    return;
-  }
-
-  remainingEl.textContent = `お題 残り ${remainingTopics.length} / ${allTopics.length}`;
-
-  if (allTopics.length && remainingTopics.length === 0) {
-    remainingEl.classList.add("all-used");
-  } else {
-    remainingEl.classList.remove("all-used");
+  if (wolfRemainingEl) {
+    wolfRemainingEl.textContent = `🐺 人狼 ${wolfTopics.length}問`;
+    wolfRemainingEl.classList.toggle("all-used", wolfTopics.length === 0);
   }
 }
 
@@ -495,8 +505,17 @@ function pickTopic() {
 
   if (!remainingTopics.length) return null;
 
-  const index = Math.floor(Math.random() * remainingTopics.length);
-  const [topic] = remainingTopics.splice(index, 1);
+  // 同じカテゴリが続かないよう、可能なら別カテゴリから選ぶ。
+  var candidateIndexes = [];
+  for (var i = 0; i < remainingTopics.length; i++) {
+    if (!lastTopicCategory || remainingTopics[i].category !== lastTopicCategory) {
+      candidateIndexes.push(i);
+    }
+  }
+  var indexPool = candidateIndexes.length ? candidateIndexes : remainingTopics.map(function(_, i) { return i; });
+  var index = indexPool[Math.floor(Math.random() * indexPool.length)];
+  var topic = remainingTopics.splice(index, 1)[0];
+  lastTopicCategory = topic ? (topic.category || null) : lastTopicCategory;
 
   updateRemaining();
   saveTopicProgress();
@@ -634,12 +653,13 @@ function getRemainingTopicIds() {
 function saveGameState() {
   try {
     var state = {
-      version: 84,
+      version: 93,
       gameActive: gameActive,
       roundNumber: roundNumber,
       stage: currentStageName,
       topicMode: topicMode,
       gameMode: gameMode,
+      normalRange: normalRange,
       werewolfTotalRounds: werewolfTotalRounds,
       wolfDifficulty: wolfDifficulty,
       werewolfName: werewolfName,
@@ -747,6 +767,7 @@ function restoreSavedGame() {
     syncTopicModeControls();
   }
   gameMode = state.gameMode === "werewolf" ? "werewolf" : "normal";
+  normalRange = ["full", "upper50", "upper20"].includes(state.normalRange) ? state.normalRange : "full";
   werewolfTotalRounds = 5;
   wolfDifficulty = state.wolfDifficulty === "hard" ? "hard" : "normal";
   werewolfName = state.werewolfName || null;
@@ -938,6 +959,7 @@ function loadSettings() {
     vibrationEnabled = saved.vibration !== false;
     topicMode = saved.topicMode === "favorites" ? "favorites" : "normal";
     gameMode = saved.gameMode === "werewolf" ? "werewolf" : "normal";
+    normalRange = ["full", "upper50", "upper20"].includes(saved.normalRange) ? saved.normalRange : "full";
     werewolfTotalRounds = 5;
     wolfDifficulty = saved.wolfDifficulty === "hard" ? "hard" : "normal";
   } catch {
@@ -945,6 +967,7 @@ function loadSettings() {
     vibrationEnabled = true;
     topicMode = "normal";
     gameMode = "normal";
+    normalRange = "full";
     werewolfTotalRounds = 5;
     wolfDifficulty = "normal";
   }
@@ -966,6 +989,8 @@ function saveSettings() {
 
   var checkedGameMode = document.querySelector('input[name="gameMode"]:checked');
   gameMode = checkedGameMode && checkedGameMode.value === "werewolf" ? "werewolf" : "normal";
+  var checkedNormalRange = document.querySelector('input[name="normalRange"]:checked');
+  normalRange = checkedNormalRange && ["full", "upper50", "upper20"].includes(checkedNormalRange.value) ? checkedNormalRange.value : "full";
   werewolfTotalRounds = 5;
   var checkedWolfDifficulty = document.querySelector('input[name="wolfDifficulty"]:checked');
   wolfDifficulty = checkedWolfDifficulty && checkedWolfDifficulty.value === "hard" ? "hard" : "normal";
@@ -975,6 +1000,7 @@ function saveSettings() {
     vibration: vibrationEnabled,
     topicMode: topicMode,
     gameMode: gameMode,
+    normalRange: normalRange,
     wolfDifficulty: wolfDifficulty,
     werewolfTotalRounds: werewolfTotalRounds
   }));
@@ -984,6 +1010,8 @@ function saveSettings() {
 
 function syncGameModeControls() {
   gameModeInputs.forEach(function(input) { input.checked = input.value === gameMode; });
+  normalRangeInputs.forEach(function(input) { input.checked = input.value === normalRange; });
+  if (normalRangeOptions) normalRangeOptions.classList.toggle("hidden", gameMode !== "normal");
   wolfRoundInputs.forEach(function(input) { input.checked = Number(input.value) === werewolfTotalRounds; });
   if (werewolfOptions) werewolfOptions.classList.toggle("hidden", gameMode !== "werewolf");
   wolfDifficultyInputs.forEach(function(input) { input.checked = input.value === wolfDifficulty; });
@@ -1078,6 +1106,8 @@ function startGame() {
   wolfGuessName = null;
   wolfTopicQueue = gameMode === "werewolf" ? shuffle(wolfTopics.map(function(topic) { return topic.id; })) : [];
   lastWolfTopicId = null;
+  lastTopicCategory = null;
+  lastWolfTopicCategory = null;
   currentStageName = "number";
   setupMessage.textContent = "";
   renderPlayers();
@@ -1208,7 +1238,14 @@ function finishNumberView() {
 }
 
 function showTopic() {
-  if (rangeRuleNotice) rangeRuleNotice.classList.toggle("hidden", gameMode !== "werewolf");
+  if (rangeRuleNotice) {
+    rangeRuleNotice.classList.toggle("hidden", gameMode !== "werewolf");
+    if (gameMode === "werewolf") {
+      var rangeText = wolfDifficulty === "hard" ? "80〜100" : "51〜100";
+      rangeRuleNotice.innerHTML = `🐺 数字は <strong>${rangeText}</strong>。ただし回答は通常どおり<strong>1〜100の尺度</strong>で考えます。`;
+    }
+  }
+  updateWolfStatus();
   topicEl.textContent = currentTopic.topic;
   minLabel.textContent = currentTopic.minLabel;
   maxLabel.textContent = currentTopic.maxLabel;
@@ -1235,7 +1272,7 @@ function renderRankingSelection() {
   rankSlots.innerHTML = roundPlayers.map(function(player, index) {
     var selectedName = rankingOrder[index];
     return `
-      <div class="rank-slot ${selectedName ? "filled" : ""}">
+      <div class="rank-slot ${selectedName ? "filled removable" : ""}" ${selectedName ? `data-rank-index="${index}"` : ""}>
         <span class="rank-slot-position">${index + 1}位</span>
         <span class="rank-slot-name ${selectedName ? "" : "empty"}">
           ${selectedName ? escapeHtml(selectedName) : "未選択"}
@@ -1243,6 +1280,13 @@ function renderRankingSelection() {
       </div>
     `;
   }).join("");
+
+  var filledSlots = rankSlots.querySelectorAll(".rank-slot.removable");
+  for (var slotIndex = 0; slotIndex < filledSlots.length; slotIndex++) {
+    filledSlots[slotIndex].addEventListener("click", function() {
+      removeRankSelection(Number(this.getAttribute("data-rank-index")));
+    });
+  }
 
   var unusedNames = roundPlayers
     .map(function(player) { return player.name; })
@@ -1273,6 +1317,17 @@ function selectRankMember(name) {
   if (rankingOrder.length >= roundPlayers.length) return;
 
   rankingOrder.push(name);
+  playTone("tap");
+  vibrate(15);
+  renderRankingSelection();
+  saveGameState();
+}
+
+function removeRankSelection(index) {
+  if (!Number.isInteger(index)) return;
+  if (index < 0 || index >= rankingOrder.length) return;
+
+  rankingOrder.splice(index, 1);
   playTone("tap");
   vibrate(15);
   renderRankingSelection();
@@ -1572,7 +1627,21 @@ function revealWerewolfResult() {
     : sabotageSuccess
       ? `人狼は ${escapeHtml(werewolfName)}！ 正体を隠したまま ${werewolfMisses}回のミスを起こしました。`
       : `人狼は ${escapeHtml(werewolfName)}！ 正体は隠せましたが、ミスは ${werewolfMisses}回で目標の${wolfMissTarget()}回に届きませんでした。`;
-  wolfFinalResult.innerHTML = `<div class="wolf-result-title">${title}</div><div class="wolf-result-reveal">人狼は…… <strong>${escapeHtml(werewolfName)}</strong> 🐺</div><p>${reason}</p><div class="wolf-result-score">並び替えミス ${werewolfMisses} / 目標 ${wolfMissTarget()}</div>`;
+  var guessCorrectText = caught ? "的中" : "ハズレ";
+  var rangeText = wolfDifficulty === "hard" ? "80〜100" : "51〜100";
+  wolfFinalResult.innerHTML = `
+    <div class="wolf-result-title">${title}</div>
+    <div class="wolf-result-reveal">人狼は…… <strong>${escapeHtml(werewolfName)}</strong> 🐺</div>
+    <div class="wolf-summary-grid">
+      <div><span>人狼</span><strong>${escapeHtml(werewolfName)}</strong></div>
+      <div><span>みんなの予想</span><strong>${escapeHtml(wolfGuessName)}</strong></div>
+      <div><span>予想結果</span><strong>${guessCorrectText}</strong></div>
+      <div><span>失敗</span><strong>${werewolfMisses} / ${wolfMissTarget()}</strong></div>
+      <div><span>難易度</span><strong>${wolfDifficulty === "hard" ? "🔥 難しい" : "通常"}</strong></div>
+      <div><span>数字範囲</span><strong>${rangeText}</strong></div>
+    </div>
+    <p>${reason}</p>
+  `;
   wolfFinalResult.classList.remove("hidden");
   revealWolfBtn.classList.add("hidden");
   wolfGuessButtons.querySelectorAll("button").forEach(function(b) { b.disabled = true; });
@@ -1697,7 +1766,7 @@ function resetTopics() {
   saveTopicProgress();
 
   updateRemaining();
-  setupMessage.textContent = "お題を500個に戻しました。";
+  setupMessage.textContent = "お題を650個に戻しました。";
   saveGameState();
 }
 
@@ -1711,6 +1780,13 @@ topicModeInputs.forEach(function(input) {
   });
 });
 gameModeInputs.forEach(function(input) {
+  input.addEventListener("change", function() {
+    saveSettings();
+    syncGameModeControls();
+    setupMessage.textContent = "";
+  });
+});
+normalRangeInputs.forEach(function(input) {
   input.addEventListener("change", function() {
     saveSettings();
     syncGameModeControls();
@@ -1735,8 +1811,8 @@ startBtn.addEventListener("click", startGame);
 resetTopicsBtn.addEventListener("click", function() {
   openConfirmDialog({
     title: "お題をリセットしますか？",
-    message: "使用済みのお題の記録を消して、残りを500問に戻します。\nこの操作は元に戻せません。",
-    okText: "500問に戻す",
+    message: "使用済みのお題の記録を消して、残りを650問に戻します。\nこの操作は元に戻せません。",
+    okText: "650問に戻す",
     onConfirm: resetTopics
   });
 });

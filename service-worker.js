@@ -1,4 +1,4 @@
-const CACHE_NAME = "ito-game-cache-v8-8-20260911";
+const CACHE_NAME = "ito-game-cache-v9-3-20260911";
 
 const CORE_ASSETS = [
   "./",
