@@ -1,4 +1,4 @@
-const CACHE_NAME = "ito-game-cache-v9-3-20260911";
+const CACHE_NAME = "value-game-cache-v11-2-20260913";
 
 const CORE_ASSETS = [
   "./",
@@ -7,8 +7,6 @@ const CORE_ASSETS = [
   "./script.js",
   "./topics.csv",
   "./topics-data.js",
-  "./wolf-topics.csv",
-  "./wolf-topics-data.js",
   "./manifest.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -36,7 +34,7 @@ self.addEventListener("activate", function(event) {
       .then(function(keys) {
         return Promise.all(
           keys.map(function(key) {
-            if (key !== CACHE_NAME && key.indexOf("ito-game-cache-") === 0) {
+            if (key !== CACHE_NAME && (key.indexOf("ito-game-cache-") === 0 || key.indexOf("value-game-cache-") === 0)) {
               return caches.delete(key);
             }
           })

@@ -1,7 +1,7 @@
 {
-  "name": "ito お題アプリ",
-  "short_name": "ito",
-  "description": "500個のお題で遊べるito用ゲームアプリ",
+  "name": "だれが一番みんなのことわかってる？",
+  "short_name": "わかってる？",
+  "description": "相手の価値観を数字で推理する『だれが一番みんなのことわかってる？』250問版",
   "lang": "ja",
   "start_url": "./",
   "scope": "./",
